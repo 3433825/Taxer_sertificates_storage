@@ -1,0 +1,63 @@
+import pytest
+from pages.base_page import BasePage
+from pages.main_page import MainPage
+from pages.upload_page import UploadPage
+from utils.constants import CertConstants
+from utils.logger import get_logger
+from config import Config
+
+# Ініціалізуємо логер для фікстур
+logger = get_logger(__name__)
+
+
+@pytest.fixture(autouse=True)
+def setup_and_teardown(page):
+    """
+    Базова фікстура: готує чистий додаток перед кожним тестом.
+    Виконується автоматично завдяки autouse=True.
+    """
+    logger.info("=== ПІДГОТОВКА СЕРЕДОВИЩА (Setup) ===")
+    base_page = BasePage(page)
+
+    # 1. Відкриваємо сайт та проходимо StackBlitz
+    base_page.navigate()
+
+    # 2. Очищуємо LocalStorage (Вимога 3)
+    base_page.clear_local_storage()
+
+    # 3. Перезавантажуємо, щоб додаток побачив порожнє сховище
+    base_page.reload_page()
+
+    logger.info("=== СЕРЕДОВИЩЕ ГОТОВЕ ДО ТЕСТУ ===")
+    yield
+    logger.info("=== ЗАВЕРШЕННЯ ТЕСТУ (Teardown) ===")
+
+
+@pytest.fixture
+def preloaded_certs(page):
+    """
+    Фікстура-наповнювач: завантажує сертифікати перед початком тесту.
+    Тепер використовує upload_via_drop (Fix для 05_08).
+    """
+    logger.info("Початок попереднього завантаження сертифікатів через фікстуру...")
+    main_page = MainPage(page)
+    upload_page = UploadPage(page)
+
+    certs_to_upload = [
+        {"path": Config.CERTS["valid"]["path"], "name": CertConstants.VALID_OWNER}
+        # Можна додати інші, якщо треба тестувати перемикання
+    ]
+
+    for cert in certs_to_upload:
+        logger.info(f"Фікстура завантажує: {cert['name']}")
+        main_page.open_upload_screen()
+
+        # ВИПРАВЛЕННЯ: викликаємо upload_via_drop замість upload_certificate
+        upload_page.upload_via_drop(cert["path"])
+
+        # Обов'язково чекаємо, поки панель закриється (автоматично або через Back)
+        page.wait_for_timeout(1000)
+        upload_page.return_to_main()
+
+    logger.info("Фікстура успішно підготувала дані.")
+    return certs_to_upload

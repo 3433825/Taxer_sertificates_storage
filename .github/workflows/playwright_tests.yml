@@ -1,0 +1,26 @@
+name: Playwright Tests (UV)
+on: [push, workflow_dispatch]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+      - name: Set up Python
+        run: uv python install 3.12
+      - name: Install dependencies
+        run: uv sync --frozen
+      - name: Install Playwright Browsers
+        run: uv run playwright install --with-deps chromium
+      - name: Run Tests
+        env:
+          BASE_URL: ${{ secrets.BASE_URL }}
+        run: uv run pytest tests/ -s --log-cli-level=INFO
+      - name: Upload Logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: logs
+          path: logs/
