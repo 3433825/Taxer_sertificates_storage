@@ -37,14 +37,7 @@ jobs:
           CERT_VALID: "data/valid_cert.cer"
           CERT_EXPIRED: "data/expired.cer"
         run: |
-          # Створюємо папку для логів заздалегідь
           mkdir -p logs
-          
-          echo "=== ПЕРЕВІРКА СТРУКТУРИ ФАЙЛІВ ==="
-          ls -R
-          
-          echo "=== ЗАПУСК ТЕСТІВ ==="
-          # Додаємо PYTHONPATH=. та запускаємо пошук тестів у всій папці проекту
           PYTHONPATH=. uv run pytest . -v -s --log-cli-level=INFO
 
       - name: Upload Logs
