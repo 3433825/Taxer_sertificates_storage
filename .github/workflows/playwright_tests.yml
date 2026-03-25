@@ -1,26 +1,53 @@
 name: Playwright Tests (UV)
-on: [push, workflow_dispatch]
+
+on:
+  push:
+    branches: [ main, master, fix-ci-pipeline ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
 
 jobs:
   test:
+    name: Run Pytest in Docker
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Install uv
         uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+          enable-cache: true
+
       - name: Set up Python
         run: uv python install 3.12
+
       - name: Install dependencies
         run: uv sync --frozen
+
       - name: Install Playwright Browsers
         run: uv run playwright install --with-deps chromium
+
       - name: Run Tests
         env:
           BASE_URL: ${{ secrets.BASE_URL }}
-        run: uv run pytest tests/ -s --log-cli-level=INFO
+        run: |
+          # Створюємо папку для логів заздалегідь
+          mkdir -p logs
+          
+          echo "=== ПЕРЕВІРКА СТРУКТУРИ ФАЙЛІВ ==="
+          ls -R
+          
+          echo "=== ЗАПУСК ТЕСТІВ ==="
+          # Додаємо PYTHONPATH=. та запускаємо пошук тестів у всій папці проекту
+          PYTHONPATH=. uv run pytest . -v -s --log-cli-level=INFO
+
       - name: Upload Logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: logs
+          name: execution-logs-uv
           path: logs/
