@@ -34,6 +34,8 @@ jobs:
       - name: Run Tests
         env:
           BASE_URL: ${{ secrets.BASE_URL }}
+          CERT_VALID: "data/valid_cert.cer"
+          CERT_EXPIRED: "data/expired.cer"
         run: |
           # Створюємо папку для логів заздалегідь
           mkdir -p logs
