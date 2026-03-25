@@ -74,3 +74,22 @@ class MainPage(BasePage):
         is_active = "active" in classes
         logger.info(f"Сертифікат '{name}' має статус active: {is_active}")
         return is_active
+
+    def open_upload(self):
+        """Аліас для open_upload_screen, який очікує тест"""
+        self.open_upload_screen()
+
+    def get_cert_row(self, name: str):
+        """Метод, який очікує тест для кліку по сертифікату"""
+        return self.get_cert_by_name(name)
+
+    def check_active_indicator(self, name: str) -> bool:
+        """
+        Перевірка BUG-11: пошук символу '►' всередині активного елемента.
+        """
+        target = self.get_cert_by_name(name)
+        # Шукаємо текст стрілочки всередині конкретного рядка
+        indicator = target.locator("span:has-text('►')")
+        is_visible = indicator.is_visible()
+        logger.info(f"Індикатор '►' для '{name}' видимий: {is_visible}")
+        return is_visible
