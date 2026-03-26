@@ -1,7 +1,3 @@
-Ось структура професійного **README.md**, яка висвітлює не лише те, що роблять тести, а й твій технічний стек (uv, Playwright, CI/CD). Це саме те, що шукають техліди, коли переглядають GitHub кандидатів.
-
----
-
 # 🛡️ Taxer Certificate Storage QA Automation
 
 [![Playwright Tests](https://github.com/3433825/Taxer_sertificates_storage/actions/workflows/playwright_tests.yml/badge.svg)](https://github.com/3433825/Taxer_sertificates_storage/actions)
