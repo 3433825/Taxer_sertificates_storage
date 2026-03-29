@@ -16,8 +16,9 @@ class UploadPage(BasePage):
     def __init__(self, page):
         super().__init__(page)
         self.drop_zone_selector = "dropbox.dropbox"
-        self.drop_zone = page.locator("dropbox.dropbox")
+        self.drop_zone = page.locator("dropbox div")
         self.back_button = page.locator("button:has-text('Back')")
+        self.instruction_text = "Перетягніть файл сертифікату сюди або"
 
     def upload_via_drop(self, file_path: str):
         """
@@ -82,7 +83,7 @@ class UploadPage(BasePage):
     def return_to_main(self):
         """
         Натискає 'Back' для повернення, якщо панель ще відкрита.
-        Додано перевірку видимості, щоб уникнути TimeoutError (скрін 05_05).
+        Додано перевірку видимості, щоб уникнути TimeoutError.
         """
         logger.info("Спроба повернутися до головного екрана...")
 
