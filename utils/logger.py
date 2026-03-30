@@ -16,7 +16,7 @@ def get_logger(name):
             os.makedirs(log_dir)
 
         # Формуємо ім'я файлу на основі поточної дати
-        log_filename = datetime.now().strftime("%Y-%m-%d.log")
+        log_filename = datetime.now().strftime("%d-%m-%Y.log")
         log_path = os.path.join(log_dir, log_filename)
 
         # Налаштування формату

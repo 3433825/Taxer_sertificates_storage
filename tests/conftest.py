@@ -1,3 +1,4 @@
+import allure
 import pytest
 from pages.base_page import BasePage
 from pages.main_page import MainPage
@@ -37,27 +38,49 @@ def setup_and_teardown(page):
 def preloaded_certs(page):
     """
     Фікстура-наповнювач: завантажує сертифікати перед початком тесту.
-    Тепер використовує upload_via_drop (Fix для 05_08).
+    Використовує upload_via_drop (Fix для 05_08).
     """
-    logger.info("Початок попереднього завантаження сертифікатів через фікстуру...")
     main_page = MainPage(page)
     upload_page = UploadPage(page)
 
     certs_to_upload = [
         {"path": Config.CERTS["valid"]["path"], "name": CertConstants.VALID_OWNER}
-        # Можна додати інші, якщо треба тестувати перемикання
     ]
 
-    for cert in certs_to_upload:
-        logger.info(f"Фікстура завантажує: {cert['name']}")
-        main_page.open_upload_screen()
+    # --- SETUP ---
+    with allure.step("Setup: Попереднє завантаження сертифікатів через фікстуру"):
+        logger.info("Початок попереднього завантаження сертифікатів...")
 
-        # ВИПРАВЛЕННЯ: викликаємо upload_via_drop замість upload_certificate
-        upload_page.upload_via_drop(cert["path"])
+        for cert in certs_to_upload:
+            with allure.step(f"Завантаження: {cert['name']}"):
+                main_page.open_upload_screen()
+                upload_page.upload_via_drop(cert["path"])
+                # Замість wait_for_timeout краще чекати на повернення кнопки
+                upload_page.return_to_main()
 
-        # Обов'язково чекаємо, поки панель закриється (автоматично або через Back)
-        page.wait_for_timeout(1000)
-        upload_page.return_to_main()
+        logger.info("Фікстура успішно підготувала дані.")
 
-    logger.info("Фікстура успішно підготувала дані.")
-    return certs_to_upload
+    yield certs_to_upload  # Тест отримує дані тут
+
+    # --- TEARDOWN ---
+    with allure.step("Teardown: Очищення LocalStorage після тесту"):
+        logger.info("Очищення даних для ізоляції наступного тесту")
+        page.evaluate("localStorage.clear()")
+        page.reload()
+
+
+@pytest.hookimpl(tryfirst=True, hookwrapper=True)
+def pytest_runtest_makereport(item, call):
+    outcome = yield
+    report = outcome.get_result()
+
+    # Перевіряємо, чи тест впав під час виконання
+    if report.when == "call" and report.failed:
+        page = item.funcargs.get("page")
+        if page:
+            # Робимо скріншот і додаємо в Allure
+            allure.attach(
+                page.screenshot(full_page=True),
+                name="screenshot_on_failure",
+                attachment_type=allure.attachment_type.PNG,
+            )

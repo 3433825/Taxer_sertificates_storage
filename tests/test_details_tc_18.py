@@ -1,63 +1,58 @@
+import allure
 import pytest
 from playwright.sync_api import expect
 from pages.main_page import MainPage
-from utils.constants import CertConstants
 from utils.logger import get_logger
 
 logger = get_logger(__name__)
 
 
-def test_certificate_details_tc_18(page, preloaded_certs):
+@allure.feature("Деталі сертифікату")
+@pytest.mark.xfail(
+    reason="BUG-08: Порядок та назви полів не відповідають ТЗ (Вимога 8)"
+)
+@allure.story("Перевірка порядку полів у деталях")
+@allure.severity(allure.severity_level.NORMAL)
+@allure.issue("TC-18", "Відповідність порядку полів у таблиці деталей (Вимога 8)")
+def test_certificate_details_order_tc18(page, preloaded_certs):
     """
-    TC-18: Перевірка деталей сертифіката (на основі верстки image_11.png).
-    Фіксує BUG-07 (SubjectCN) та BUG-08 (Порядок полів).
+    TC-18: Перевірка порядку полів у деталях сертифікату.
+
+    Кроки:
+    1. Використовує фікстуру preloaded_certs для підготовки даних.
+    2. Вибирає завантажений сертифікат зі списку.
+    3. Отримує список заголовків у таблиці деталей.
+    4. Порівнює фактичний порядок із еталонним згідно з ТЗ.
     """
-    logger.info("--- ЗАПУСК TC-18: Верифікація деталей за ТЗ ---")
+    logger.info("--- ЗАПУСК TC-18: Перевірка порядку полів у деталях ---")
+
     main_page = MainPage(page)
-    cert_name = CertConstants.VALID_OWNER
 
-    # 1. Клік по сертифікату
-    main_page.get_cert_by_name(cert_name).click()
+    # Еталонний порядок полів згідно з Технічним Завданням (Вимога 8)
+    ideal_order = ["Common Name", "Issuer CN", "Valid From", "Valid To"]
 
-    # 2. ПЕРЕВІРКА: чи з'явилася таблиця деталей
-    expect(
-        main_page.details_panel, message="Таблиця деталей не з'явилася після кліку"
-    ).to_be_visible(timeout=5000)
+    # Отримуємо ім'я сертифіката, який завантажила фікстура
+    expected_name = preloaded_certs[0]["name"]
 
-    # 3. ВЕРИФІКАЦІЯ НАЗВ ТА ПОРЯДКУ ПОЛІВ
-    # Отримуємо фактичні назви полів (<th>)
-    actual_fields_raw = main_page.detail_labels.all_text_contents()
+    with allure.step(f"1. Вибір сертифіката зі списку: {expected_name}"):
+        logger.info(f"Шукаємо та клікаємо по сертифікату: {expected_name}")
+        cert_item = main_page.get_cert_by_name(expected_name)
 
-    # Очищуємо від двокрапок та пробілів
-    actual_fields = [f.replace(":", "").strip() for f in actual_fields_raw]
+        # Додаткова перевірка видимості перед кліком для стабільності
+        expect(cert_item).to_be_visible(timeout=5000)
+        cert_item.click()
 
-    logger.info(f"Фактичні поля на екрані: {actual_fields}")
+    with allure.step("2. Отримання фактичного списку полів з таблиці деталей"):
+        # Метод get_details_headers має повертати список текстів заголовків (TH або TD)
+        actual_fields = main_page.get_details_headers()
+        logger.info(f"Отримано фактичні поля: {actual_fields}")
 
-    # Складаємо список ФАКТИЧНИХ полів з констант для порівняння
-    current_ui_order = [
-        CertConstants.ACTUAL_FIELD_SUBJECT_CN,
-        CertConstants.ACTUAL_FIELD_ISSUER_CN,
-        CertConstants.ACTUAL_FIELD_VALID_TILL,
-        CertConstants.ACTUAL_FIELD_VALID_FROM,
-    ]
+    with allure.step("3. Верифікація порядку полів (BUG-08)"):
+        # Якщо порядок не збігається, тест впаде з детальним описом для Allure
+        assert actual_fields == ideal_order, (
+            f"BUG-08: Порядок полів у деталях не відповідає ТЗ. \n"
+            f"Очікувано: {ideal_order}\n"
+            f"Фактично: {actual_fields}"
+        )
 
-    # Порівнюємо фактичний стан із фактами з констант (це має пройти)
-    assert (
-        actual_fields == current_ui_order
-    ), f"Помилка селектора: отримані поля {actual_fields} не збігаються з очікуваними фактами {current_ui_order}"
-
-    # 4. ФІКСАЦІЯ БАГІВ (порівняння з ТЗ)
-    # Перевірка BUG-07 ( Common Name )
-    assert (
-        CertConstants.EXPECTED_FIELD_COMMON_NAME not in actual_fields
-    ), f"BUG-07: У деталях відображається '{CertConstants.ACTUAL_FIELD_SUBJECT_CN}' замість 'Common Name'"
-
-    # Перевірка BUG-08 ( Порядок )
-    # Створюємо ідеальний порядок за ТЗ
-    ideal_order_tz = ["Common Name", "Issuer CN", "Valid From", "Valid To"]
-
-    # Ми не можемо порівняти actual_fields == ideal_order_tz, бо назви різні.
-    # Але ми можемо перевірити, чи стоїть Issuer CN на другому місці (після очищення)
-    # (Це складніша логіка, для простоти зафіксуємо просто невідповідність назв)
-
-    logger.info("--- TC-18 ЗАВЕРШЕНО: Баги зафіксовано ---")
+    logger.info("--- TC-18 ЗАВЕРШЕНО УСПІШНО ---")

@@ -1,25 +1,54 @@
-name: Playwright Tests (UV)
+name: Playwright Tests (UV) with Allure
 
 on:
+  # Запускаємо Лінтер при кожному пуші в будь-яку гілку (включаючи fix-ci-pipeline)
+  # Але важкі тести запустимо тільки за умов нижче
   push:
     branches: [ main, master, fix-ci-pipeline ]
+
   pull_request:
     branches: [ main, master ]
+
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
-  test:
-    name: Run Pytest in Docker
+  # НОВА ШВИДКА JOB ДЛЯ ПЕРЕВІРКИ КОДУ
+  lint:
+    name: Code Quality (Linter)
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+      - name: Run Ruff Check
+        # Ruff перевірить синтаксис за 1-2 секунди
+        run: uv run ruff check .
+
+  # ОСНОВНА JOB З ТЕСТАМИ
+  test:
+    name: Run Pytest & Allure
+    runs-on: ubuntu-latest
+    # Ця job запуститься ТІЛЬКИ якщо:
+    # 1. Це Pull Request у main/master
+    # 2. Це Push у main/master
+    # 3. АБО запуск вручну (workflow_dispatch)
+    if: |
+      github.event_name == 'pull_request' || 
+      (github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')) ||
+      github.event_name == 'workflow_dispatch'
+
+    needs: lint # Тести почнуться тільки якщо Лінтер пройшов успішно
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v3
+        uses: astral-sh/setup-uv@v5
         with:
-          version: "latest"
           enable-cache: true
 
       - name: Set up Python
@@ -38,11 +67,40 @@ jobs:
           CERT_EXPIRED: "data/expired.cer"
         run: |
           mkdir -p logs
-          PYTHONPATH=. uv run pytest . -v -s --log-cli-level=INFO
+          PYTHONPATH=. uv run pytest . -v -s --log-cli-level=INFO --alluredir=allure-results
 
-      - name: Upload Logs
+      - name: Upload Logs & Results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: execution-logs-uv
-          path: logs/
+          name: execution-artifacts
+          path: |
+            logs/
+            allure-results/
+
+      # Далі йдуть кроки Checkout gh-pages, Generate Allure та Publish (як у попередньому варіанті)
+      - name: Checkout gh-pages
+        uses: actions/checkout@v4
+        if: always()
+        continue-on-error: true
+        with:
+          ref: gh-pages
+          path: gh-pages-dir
+
+      - name: Generate Allure report
+        uses: andgineer/allure-report@v3.6
+        id: allure-report
+        if: always()
+        with:
+          allure-results: allure-results
+          website: gh-pages-dir
+          reports-site-path: builds/tests
+
+      - name: Publish Allure report to GitHub Pages
+        if: ${{ always() && (steps.allure-report.outcome == 'success') }}
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: ${{ steps.allure-report.outputs.reports-site }}
+          destination_dir: ${{ steps.allure-report.outputs.reports-site-path }}
