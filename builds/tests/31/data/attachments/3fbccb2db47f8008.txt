@@ -1,0 +1,32 @@
+INFO     conftest:conftest.py:20 === ПІДГОТОВКА СЕРЕДОВИЩА (Setup) ===
+INFO     pages.base_page:base_page.py:17 Відкриття сторінки: https://js-qvfsmdwp.stackblitz.io/
+INFO     pages.base_page:base_page.py:28 Перевірка наявності захисного екрана StackBlitz...
+INFO     pages.base_page:base_page.py:32 Кнопка 'Run this project' знайдена. Натискаю...
+INFO     pages.base_page:base_page.py:37 Захист StackBlitz успішно пройдено.
+INFO     pages.base_page:base_page.py:56 Очищення window.localStorage...
+INFO     pages.base_page:base_page.py:61 Перезавантаження сторінки...
+INFO     pages.base_page:base_page.py:28 Перевірка наявності захисного екрана StackBlitz...
+INFO     pages.base_page:base_page.py:32 Кнопка 'Run this project' знайдена. Натискаю...
+INFO     pages.base_page:base_page.py:37 Захист StackBlitz успішно пройдено.
+INFO     pages.base_page:base_page.py:45 Очікування завантаження інтерфейсу (селектор: button.btn-primary)...
+INFO     pages.base_page:base_page.py:48 Додаток готовий до роботи.
+INFO     conftest:conftest.py:32 === СЕРЕДОВИЩЕ ГОТОВЕ ДО ТЕСТУ ===
+INFO     test_e2e_certificate_flow:test_e2e_certificate_flow.py:22 --- ЗАПУСК ПОВНОГО E2E СЦЕНАРІЮ (End-to-End) ---
+INFO     test_e2e_certificate_flow:test_e2e_certificate_flow.py:30 КРОК 1: Відкриття панелі завантаження та Drop файлу.
+INFO     pages.main_page:main_page.py:39 Натискання кнопки 'Завантажити' для відкриття панелі.
+INFO     pages.upload_page:upload_page.py:32 Початок імітації drop для: valid_cert.cer
+INFO     pages.upload_page:upload_page.py:73 JS-ін'єкція виконана успішно для valid_cert.cer
+INFO     pages.upload_page:upload_page.py:88 Спроба повернутися до головного екрана...
+INFO     pages.upload_page:upload_page.py:95 Кнопка 'Back' уже прихована (ng-hide). Схоже, панель закрилася автоматично.
+INFO     test_e2e_certificate_flow:test_e2e_certificate_flow.py:36 Файл завантажено, повернуто до головного екрана.
+INFO     test_e2e_certificate_flow:test_e2e_certificate_flow.py:40 КРОК 2: Повне перезавантаження сторінки.
+INFO     test_e2e_certificate_flow:test_e2e_certificate_flow.py:46 КРОК 3: Перевірка стійкості даних у списку.
+INFO     pages.main_page:main_page.py:45 Пошук локатора для сертифіката: Олег Андрійович (Тест)
+INFO     test_e2e_certificate_flow:test_e2e_certificate_flow.py:53 Сертифікат 'Олег Андрійович (Тест)' успішно знайдено.
+INFO     test_e2e_certificate_flow:test_e2e_certificate_flow.py:56 КРОК 4: Відкриття панелі деталей.
+INFO     test_e2e_certificate_flow:test_e2e_certificate_flow.py:66 Дані в панелі деталей відповідають завантаженому файлу.
+INFO     test_e2e_certificate_flow:test_e2e_certificate_flow.py:69 КРОК 5: Фіксація стану активності.
+INFO     pages.main_page:main_page.py:45 Пошук локатора для сертифіката: Олег Андрійович (Тест)
+INFO     test_e2e_certificate_flow:test_e2e_certificate_flow.py:79 Сертифікат відображається коректно.
+INFO     test_e2e_certificate_flow:test_e2e_certificate_flow.py:84 --- E2E СЦЕНАРІЙ ЗАВЕРШЕНО УСПІШНО ---
+INFO     conftest:conftest.py:34 === ЗАВЕРШЕННЯ ТЕСТУ (Teardown) ===

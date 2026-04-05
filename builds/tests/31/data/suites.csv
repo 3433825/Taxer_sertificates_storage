@@ -1,0 +1,23 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"
+TC-02: Перевірка відкриття панелі завантаження.
+","5533","test_navigation_to_upload_screen_tc02[chromium]","tests","Sun Apr 05 07:31:25 GMT 2026","skipped","Sun Apr 05 07:31:31 GMT 2026","","test_navigation_tc_02","",""
+"
+E2E Сценарій: Повний життєвий цикл сертифіката.
+Включає перевірку збереження даних після перезавантаження сторінки.
+","1894","test_e2e_certificate_full_lifecycle[chromium]","tests","Sun Apr 05 07:31:11 GMT 2026","passed","Sun Apr 05 07:31:12 GMT 2026","","test_e2e_certificate_flow","",""
+"
+TC-05: Додавання сертифікату.
+Перевіряє, що після імітації Drag-and-Drop файлу .cer
+сертифікат з'являється в загальному списку.
+","550","test_successful_certificate_upload_tc05[chromium]","tests","Sun Apr 05 07:31:35 GMT 2026","passed","Sun Apr 05 07:31:35 GMT 2026","","test_upload_tc_05","",""
+"","5009","test_initial_empty_state_tc01[chromium]","tests","Sun Apr 05 07:31:16 GMT 2026","skipped","Sun Apr 05 07:31:21 GMT 2026","","test_initial_state_tc_01","",""
+"
+TC-18: Перевірка порядку полів у деталях сертифікату.
+
+Кроки:
+1. Використовує фікстуру preloaded_certs для підготовки даних.
+2. Вибирає завантажений сертифікат зі списку.
+3. Отримує список заголовків у таблиці деталей.
+4. Порівнює фактичний порядок із еталонним згідно з ТЗ.
+","541","test_certificate_details_order_tc18[chromium]","tests","Sun Apr 05 07:31:05 GMT 2026","skipped","Sun Apr 05 07:31:06 GMT 2026","","test_details_tc_18","",""
